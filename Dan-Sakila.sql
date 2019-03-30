@@ -87,8 +87,77 @@ select s.first_name, s.last_name, a.address
     
 -- 6b. Use JOIN to display the total amount rung up by each staff member in August of 2005. 
 -- Use tables staff and payment
-select s.first_name, s.last_name, round(sum(p.amount))
+select s.first_name, s.last_name, round(sum(p.amount)) as "Total Amount"
 	from staff s
     inner join payment p on s.staff_id = p.staff_id
     where month(p.payment_date)=8 and year(p.payment_date)=2005
     group by s.staff_id;
+
+-- 6c. List each film and the number of actors who are listed for that film. 
+-- Use tables film_actor and film. Use inner join.
+select f.title as "Film Title", count(fa.actor_id) as "Number of Actors"
+	from film f
+    inner join film_actor fa on f.film_id = fa.film_id
+    group by f.film_id;
+    
+-- 6d. How many copies of the film Hunchback Impossible exist in the inventory system?
+select f.title as "Film Title", count(i.inventory_id) as "Number of Copies"
+	from film f
+    inner join inventory i on f.film_id = i.film_id
+    where f.title="Hunchback Impossible"
+    group by f.film_id;
+    
+-- 6e. Using the tables payment and customer and the JOIN command, list the total paid by each customer. 
+-- List the customers alphabetically by last name
+select c.first_name, c.last_name, sum(p.amount) as "Total Amount Paid"
+	from customer c
+    inner join payment p on c.customer_id = p.customer_id
+    group by c.customer_id
+    order by c.last_name;
+    
+-- 7a. The music of Queen and Kris Kristofferson have seen an unlikely resurgence. 
+-- As an unintended consequence, films starting with the letters K and Q have also soared in popularity. 
+-- Use subqueries to display the titles of movies starting with the letters K and Q whose language is English.
+select title from film 
+	where title like "k%" or title like "Q%" 
+    and language_id = 
+    (
+		select language_id from language 
+			where name="English"
+    );
+
+-- 7b. Use subqueries to display all actors who appear in the film Alone Trip
+select first_name, last_name from actor
+    where actor_id in 
+    (
+		select actor_id from film_actor where film_id = 
+        (
+			select film_id from film where title = "Alone Trip"
+        )        
+    )
+    order by last_name;
+
+-- 7c. You want to run an email marketing campaign in Canada, 
+-- for which you will need the names and email addresses of all Canadian customers. 
+-- Use joins to retrieve this information.
+select cu.first_name, cu.last_name, cu.email from customer cu
+	inner join address a on cu.address_id = a.address_id
+    inner join city ci on a.city_id = ci.city_id 
+    inner join country co on ci.country_id = co.country_id
+    where co.country="Canada"
+    order by cu.last_name;
+
+-- 7d. Sales have been lagging among young families, and you wish to target all family movies for a promotion. 
+-- Identify all movies categorized as family films	
+select f.title from film f
+	inner join film_category fc on f.film_id = fc.film_id
+    inner join category c on fc.category_id = c.category_id
+    where c.name = "Family";
+
+-- 7e. Display the most frequently rented movies in descending order  
+SELECT f.title, count(r.rental_id) AS "Total Rentals"
+    FROM rental r 
+    INNER JOIN inventory i ON r.inventory_id = i.inventory_id
+    INNER JOIN film f ON i.film_id = f.film_id
+    GROUP BY f.film_id
+    ORDER BY 'Total Rentals' DESC;
