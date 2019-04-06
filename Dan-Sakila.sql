@@ -160,4 +160,33 @@ SELECT f.title, count(r.rental_id) AS "Total Rentals"
     INNER JOIN inventory i ON r.inventory_id = i.inventory_id
     INNER JOIN film f ON i.film_id = f.film_id
     GROUP BY f.film_id
-    ORDER BY 'Total Rentals' DESC;
+    ORDER BY count(r.rental_id) DESC;
+
+-- 7f. Write a query to display how much business, in dollars, each store brought in.
+SELECT s.store_id, SUM(p.amount) AS "Total Business"
+    FROM payment p
+    INNER JOIN rental r ON p.rental_id = r.rental_id
+	INNER JOIN inventory i ON r.inventory_id = i.inventory_id
+    INNER JOIN store s ON i.store_id = s.store_id
+    GROUP BY s.store_id
+    ORDER BY SUM(p.amount) DESC;
+    
+-- 7g. Write a query to display for each store its store ID, city, and country.
+select s.store_id, ci.city, co.country from store s
+	inner join address a on s.address_id = a.address_id
+    inner join city ci on a.city_id = ci.city_id 
+    inner join country co on ci.country_id = co.country_id;
+
+-- 7h. List the top five genres in gross revenue in descending order. 
+-- (Hint: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
+SELECT c.name AS "Genres", SUM(p.amount) AS "Gross Revenue"
+    FROM payment p
+    INNER JOIN rental r ON p.rental_id = r.rental_id
+	INNER JOIN inventory i ON r.inventory_id = i.inventory_id
+    INNER JOIN film f on i.film_id = f.film_id
+    INNER JOIN film_category fc on f.film_id = fc.film_id
+    INNER JOIN category c on fc.category_id = c.category_id
+    GROUP BY fc.category_id
+    ORDER BY SUM(p.amount) DESC
+    limit 5;
+    
